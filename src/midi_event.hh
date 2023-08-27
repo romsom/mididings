@@ -161,6 +161,7 @@ struct MidiEvent
             int data1;
             int data2;
         };
+	    int data[2];
     };
 
     SysExDataConstPtr sysex;

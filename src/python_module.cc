@@ -338,9 +338,9 @@ BOOST_PYTHON_MODULE(_mididings)
 
     // storage
     class_<WriteGlobalRegister, bases<Unit>, noncopyable>(
-	    "WriteGlobalRegister", init<std::string>());
+	    "WriteGlobalRegister", init<std::string, int>());
     class_<ReadGlobalRegister, bases<Unit>, noncopyable>(
-	    "ReadGlobalRegister", init<std::string>());
+	    "ReadGlobalRegister", init<std::string, int>());
 
     // engine
     class_<Sanitize, bases<UnitEx>, noncopyable>(

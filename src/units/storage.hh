@@ -28,21 +28,29 @@ class WriteGlobalRegister
   : public Unit
 {
 public:
-	WriteGlobalRegister(std::string identifier) {
-		this->identifier = identifier;
-	}
+	WriteGlobalRegister(std::string identifier, int index) : identifier(identifier), index(index)
+	{ }
 
 	virtual bool process(MidiEvent & e) const
 	{
 		// TODO: Optimization: enumerate registers and preallocate memory
 		// TODO: check return value
-		// TODO: make data element selectable
-		util::storage::get_storage().store_global_register(identifier, e.data1);
+		if (e.type & MIDI_EVENT_SYSEX) {
+			if (index < 0 || (size_t)index >= e.sysex->size())
+				return false;
+			int value = (*e.sysex)[index];
+			util::storage::get_storage().store_global_register(identifier, value);
+		} else {
+			if (index < 0 || index >= 2)
+				return false;
+			util::storage::get_storage().store_global_register(identifier, e.data[index]);
+		}
 		return true;
 	}
 
 private:
 	std::string identifier;
+	int index;
 };
 
 // Unit which reads back a previously stored value indexed by name
@@ -50,21 +58,32 @@ class ReadGlobalRegister
   : public Unit
 {
 public:
-	ReadGlobalRegister(std::string identifier) {
-		this->identifier = identifier;
-	}
+	ReadGlobalRegister(std::string identifier, int index) : identifier(identifier), index(index)
+	{ }
 
 	virtual bool process(MidiEvent & e) const
 	{
 		// TODO: Optimization: enumerate registers and preallocate memory
 		// TODO: check return value
-		// TODO: make data element selectable
-		util::storage::get_storage().read_global_register(identifier, e.data1);
+		if (e.type & MIDI_EVENT_SYSEX) {
+			if (index < 0 || (size_t)index >= e.sysex->size())
+				return false;
+			int value;
+			util::storage::get_storage().read_global_register(identifier, value);
+			SysExDataPtr new_sysex(new SysExData(*e.sysex));
+			(*new_sysex)[index] = value;
+			e.sysex = new_sysex;
+		} else {
+			if (index < 0 || index >= 2)
+				return false;
+			util::storage::get_storage().read_global_register(identifier, e.data[index]);
+		}
 		return true;
 	}
 
 private:
 	std::string identifier;
+	int index;
 };
 
 } // units

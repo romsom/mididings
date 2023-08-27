@@ -14,20 +14,22 @@ import _mididings
 from mididings.units.base import _Unit
 import mididings.unitrepr as _unitrepr
 
-@_unitrepr.accept(str)
-def WriteGlobalRegister(identifier):
+@_unitrepr.accept(str, int)
+def WriteGlobalRegister(identifier, index):
     """
-    WriteGlobalregister(identifier)
+    WriteGlobalregister(identifier, index)
 
     Store an event's data value into a named register for later use.
+    The index indicates which data byte should be stored. It must be 0 or 1 for regular events. For sysex events it must be greater or equal to 0 and smaller than the number of sysex bytes.
     """
-    return _Unit(_mididings.WriteGlobalRegister(identifier))
+    return _Unit(_mididings.WriteGlobalRegister(identifier, index))
 
-@_unitrepr.accept(str)
-def ReadGlobalRegister(identifier):
+@_unitrepr.accept(str, int)
+def ReadGlobalRegister(identifier, index):
     """
-    ReadGlobalregister(identifier)
+    ReadGlobalregister(identifier, index)
 
     Replace the event's data value with the one that has been saved into the named register.
+    The index indicates which data byte should be read. It must be 0 or 1 for regular events. For sysex events it must be greater or equal to 0 and smaller than the number of sysex bytes.
     """
-    return _Unit(_mididings.ReadGlobalRegister(identifier))
+    return _Unit(_mididings.ReadGlobalRegister(identifier, index))
