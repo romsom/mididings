@@ -329,3 +329,7 @@ def PitchbendRange(min, max, in_min=-8192, in_max=8191):
 def PitchbendRange(down, up, range):
     return PitchbendRange(int(float(down)/range*8192),
                           int(float(up)/range*8191))
+
+@_unitrepr.accept(int, int)
+def ChannelDistributor(from_channel, to_channel):
+    return _Unit(_mididings.ChannelDistributor(from_channel, to_channel))

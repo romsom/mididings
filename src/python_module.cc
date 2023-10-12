@@ -329,6 +329,8 @@ BOOST_PYTHON_MODULE(_mididings)
         "CtrlCurve", init<int, float, TransformMode>());
     class_<PitchbendRange, bases<Unit>, noncopyable>(
         "PitchbendRange", init<int, int, int, int>());
+    class_<ChannelDistributor, bases<Unit>, noncopyable>(
+        "ChannelDistributor", init<int, int>());
 
     // generators
     class_<Generator, bases<Unit>, noncopyable>(
