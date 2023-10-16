@@ -12,11 +12,12 @@
 #ifndef MIDIDINGS_UNITS_MODIFIERS_HH
 #define MIDIDINGS_UNITS_MODIFIERS_HH
 
+#include <memory>
+
 #include "units/base.hh"
 #include "units/util.hh"
 
-#include <vector>
-#include <tuple>
+#include "util/voice_allocation.hh"
 
 namespace mididings {
 namespace units {
@@ -286,53 +287,24 @@ public:
 		: _from_channel(from_channel)
 		, _to_channel(to_channel)
 		, _n_channels(to_channel - from_channel)
-		, _active_notes(_n_channels)
-		, _active_notes_oldest(0)
-		, _active_notes_next(0)
+		, _voice_allocator(new PolyVoiceAllocator<16>())
 	{
-		_active_notes.reserve(_n_channels);
-		// raise exception (in python?) if n_channel == 0
-		for (int i=0; i<_n_channels; i++) {
-			// mark all channels unused
-			_active_notes[i] = {0, -1};
-		}
+		_voice_allocator->set_max_voices(_n_channels);
 	}
 
-	virtual bool process(MidiEvent & ev)
+	virtual bool process(MidiEvent & ev) const
 	// TODO will non-const work?
 	{
 		if (ev.type == MIDI_EVENT_NOTEON) {
-			int channel = get_next_free_channel();
-			if (channel < 0) {
-				// steal voice
-				auto preempted_note = _active_notes[_active_notes_oldest];
-				channel = std::get<1>(preempted_note);
-				// since we reuse the channel we don't need to update it
-				_active_notes[_active_notes_oldest] = {ev.note.note, channel};
-				// TODO insert note off
-				// update pointers
-				_active_notes_oldest = (_active_notes_oldest + 1) % _n_channels;
-				_active_notes_next = (_active_notes_next + 1) % _n_channels;
-			}
+			int channel = _from_channel + _voice_allocator->note_on(ev.note.note, 42);
 			ev.channel = channel;
 		} else if (ev.type == MIDI_EVENT_NOTEOFF) {
-			int i = note_active(ev.note.note);
-			if (i >= 0) { // note is active
-				// send note off to correct channel
-				ev.channel = std::get<1>(_active_notes[i]);
-				// move all later notes one back
-				for (int offset=1; offset<_n_channels; offset++) {
-					auto note = _active_notes[(i + offset) % _n_channels];
-					// copy note into last slot
-					_active_notes[(i - 1 + offset) % _n_channels] = note;
-					// return if we have reached inactive slots
-					if (std::get<1>(note) == -1)
-						return true;
-				}
-				// set last note slot inactive explicitly
-				_active_notes[_n_channels - 1] = {0, -1};
+			auto slot = _voice_allocator->note_off(ev.note.note);
+			if (slot) {
+				int channel = _from_channel + *slot;
+				ev.channel = channel;
 			} else {
-				// drop the note or alternatively send it to all channels
+				// TODO: drop event
 			}
 		} else {
 			// TODO generate midi events for all channels
@@ -340,36 +312,11 @@ public:
 		return true;
 	}
 private:
-	int channel_active(int ch) const {
-		for (int i=0; i<_n_channels; i++) {
-			if (ch == std::get<1>(_active_notes[i]))
-				return i;
-		}
-		return -1;
-	}
-
-	int note_active(int note) const {
-		for (int i=0; i<_n_channels; i++) {
-			if (note == std::get<0>(_active_notes[i]))
-				return i;
-		}
-		return -1;
-	}
-
-	int get_next_free_channel() const {
-		for (int i =_from_channel; i<_to_channel; i++) {
-			if (channel_active(i) < 0)
-				return i;
-		}
-		return -1;
-	}
 
 	int _from_channel;
 	int _to_channel;
 	int _n_channels;
-	std::vector<std::tuple<int, int>> _active_notes; // <note, channel>
-	int _active_notes_oldest;
-	int _active_notes_next;
+	std::unique_ptr<PolyVoiceAllocator<16>> _voice_allocator;
 };
 } // units
 } // mididings
