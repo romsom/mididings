@@ -12,9 +12,10 @@
 
 import _mididings
 
-from mididings.units.base import _Unit, Filter, Split, Pass
+from mididings.units.base import _Unit, Filter, Split, Pass, Fork
 from mididings.units.splits import VelocitySplit
 from mididings.units.generators import NoteOn, NoteOff, PolyAftertouch
+from mididings.constants import NOTEON, NOTEOFF
 
 import mididings.util as _util
 import mididings.misc as _misc
@@ -332,4 +333,6 @@ def PitchbendRange(down, up, range):
 
 @_unitrepr.accept(int, int)
 def ChannelDistributor(from_channel, to_channel):
-    return _Unit(_mididings.ChannelDistributor(from_channel, to_channel))
+    ch_dist = _Unit(_mididings.ChannelDistributor(from_channel - 1, to_channel - 1))
+    ev_duplicator = [Channel(i) for i in range(from_channel, to_channel)]
+    return Fork([Filter(NOTEON | NOTEOFF) >> ch_dist, ~Filter(NOTEON | NOTEOFF) >> ev_duplicator])
