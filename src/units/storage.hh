@@ -12,6 +12,8 @@
 #ifndef MIDIDINGS_UNITS_STORAGE_HH
 #define MIDIDINGS_UNITS_STORAGE_HH
 
+#include <memory>
+
 #include "midi_event.hh"
 
 #include "units/util.hh"
@@ -86,6 +88,49 @@ private:
 	int index;
 };
 
+class Gate
+  : public Unit
+{
+public:
+	Gate(bool initial_state) : active(new bool) { *active = initial_state; };
+	Gate(Gate &linked) : active(linked.get_ref()) {};
+	std::shared_ptr<bool> get_ref() { return active; }
+
+	virtual bool process(MidiEvent & e) const {
+		return true;
+	}
+protected:
+	std::shared_ptr<bool> active;
+};
+
+
+template<bool set_active> class GateTrigger
+  : public Gate
+{
+public:
+	GateTrigger(bool initial_state) : Gate(initial_state) {}
+	GateTrigger(Gate &linked) : Gate(linked) {}
+	virtual bool process(MidiEvent & e) const
+	{
+		*active = set_active;
+		return true;
+	}
+};
+
+using GateTriggerActivate=GateTrigger<true>;
+using GateTriggerDeactivate=GateTrigger<false>;
+
+class GateFilter
+	: public Gate
+{
+public:
+	GateFilter(bool initial_state) : Gate(initial_state) {}
+	GateFilter(Gate &linked) : Gate(linked) {}
+	virtual bool process(MidiEvent & e) const
+	{
+		return *active;
+	}
+};
 } // units
 } // mididings
 

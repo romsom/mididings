@@ -341,6 +341,22 @@ BOOST_PYTHON_MODULE(_mididings)
 	    "WriteGlobalRegister", init<std::string, int>());
     class_<ReadGlobalRegister, bases<Unit>, noncopyable>(
 	    "ReadGlobalRegister", init<std::string, int>());
+    class_<Gate, bases<Unit>, noncopyable>(
+	    "Gate", init<Gate&>());
+    class_<GateTriggerActivate, bases<Unit>, noncopyable>(
+	    "GateTriggerActivate", init<Gate&>());
+    class_<GateTriggerDeactivate, bases<Unit>, noncopyable>(
+	    "GateTriggerDeactivate", init<Gate&>());
+    class_<GateFilter, bases<Unit>, noncopyable>(
+	    "GateFilter", init<Gate&>());
+    class_<Gate, bases<Unit>, noncopyable>(
+	    "Gate", init<bool>());
+    class_<GateTriggerActivate, bases<Unit>, noncopyable>(
+	    "GateTriggerActivate", init<bool>());
+    class_<GateTriggerDeactivate, bases<Unit>, noncopyable>(
+	    "GateTriggerDeactivate", init<bool>());
+    class_<GateFilter, bases<Unit>, noncopyable>(
+	    "GateFilter", init<bool>());
 
     // engine
     class_<Sanitize, bases<UnitEx>, noncopyable>(
