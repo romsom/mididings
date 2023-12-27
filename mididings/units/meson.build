@@ -9,5 +9,6 @@ python_sources = [
   'modifiers.py',
   'printing.py',
   'splits.py',
+  'storage.py',
 ]
 py.install_sources(python_sources, subdir: 'mididings/units')

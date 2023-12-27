@@ -20,6 +20,7 @@
 #include "units/filters.hh"
 #include "units/modifiers.hh"
 #include "units/generators.hh"
+#include "units/storage.hh"
 #include "units/call.hh"
 #include "curious_alloc.hh"
 
@@ -334,6 +335,12 @@ BOOST_PYTHON_MODULE(_mididings)
         "Generator", init<MidiEventType, int, int, int, int>());
     class_<SysExGenerator, bases<Unit>, noncopyable>(
         "SysExGenerator", init<int, SysExDataConstPtr const &>());
+
+    // storage
+    class_<WriteGlobalRegister, bases<Unit>, noncopyable>(
+	    "WriteGlobalRegister", init<std::string>());
+    class_<ReadGlobalRegister, bases<Unit>, noncopyable>(
+	    "ReadGlobalRegister", init<std::string>());
 
     // engine
     class_<Sanitize, bases<UnitEx>, noncopyable>(

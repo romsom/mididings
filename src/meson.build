@@ -11,6 +11,7 @@ sources = [
   'python_module.cc',
   'backend/base.cc',
   'backend/base.cc',
+  'util/storage.cc',
 ]
 
 # conditionally compiled sources
