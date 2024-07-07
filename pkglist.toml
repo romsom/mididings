@@ -1,4 +1,7 @@
-[ubuntu-22-04]
+['ubuntu-22.04']
+pkgs = ["build-essential", "meson", "ninja-build", "python3-venv", "git", "pip", "libboost-dev", "libboost-python-dev", "libboost-thread-dev", "libasound2-dev", "libjack-dev"]
+
+['ubuntu-24.04']
 pkgs = ["build-essential", "meson", "ninja-build", "python3-venv", "git", "pip", "libboost-dev", "libboost-python-dev", "libboost-thread-dev", "libasound2-dev", "libjack-dev"]
 
 [fedora]
