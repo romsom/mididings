@@ -66,6 +66,10 @@ class MidiEvent(_mididings.MidiEvent):
         if sysex is not None:
             self.sysex_ = sysex
 
+    # mask boost python safety-guard, as we don't use __getstate__, but __getinitargs__
+    # more info: https://beta.boost.org/doc/libs/1_53_0/libs/python/doc/v2/pickle.html
+    __getstate_manages_dict__ = 1
+
     def __getinitargs__(self):
         self._finalize()
         return (self.type, self.port, self.channel, self.data1, self.data2,
