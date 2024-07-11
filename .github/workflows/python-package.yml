@@ -30,15 +30,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install System dependencies
       run: |
-        python -m pip install yq
+        python -m pip install tomlq
         tomlq '."${{ matrix.os }}"."pkgs"[]' pkglist.toml | xargs sudo apt-get install
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest meson-python
     - name: Build and Install
       run: |
-        python -m pip install .
+        python -m pip install '.[test]'
     - name: Test with pytest
       run: |
         pytest
